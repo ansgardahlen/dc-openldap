@@ -1,0 +1,104 @@
+version: '2.1'
+services:
+
+#  fusiondirectory:
+##  phpldapadmin:
+#    image: osixia/phpldapadmin:latest
+#    container_name: phpldapadmin
+#    environment:
+#      PHPLDAPADMIN_LDAP_HOSTS: "openldap"
+#      PHPLDAPADMIN_HTTPS: "false"
+#      VIRTUAL_HOST: ${PUBLIC_FQDN}
+#      VIRTUAL_PORT: ${HTTP_PORT:-80}
+#      LETSENCRYPT_HOST: ${PUBLIC_FQDN}
+#      LETSENCRYPT_EMAIL: ${ADMIN_MAIL}
+##    ports:
+##      - "8080:80"
+#    depends_on:
+#    - openldap
+
+  fusiondirectory:
+    restart: always
+    container_name: dc_openldap_fusiondirectory
+    image: hrektts/fusiondirectory:latest
+    depends_on:
+      - openldap
+    environment:
+      LDAP_HOST: openldap
+      LDAP_ORGANISATION: ${LDAP_ORGANISATION}
+      LDAP_DOMAIN: ${LDAP_DOMAIN}
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+      LDAP_ROOTPW: ${LDAP_ADMIN_PASSWORD}
+      LDAP_ROOTDN: "cn=admin,dc=andacom,dc=de"
+      #LDAP_ROOTDN: "dc=andacom,dc=de"
+      FD_ADMIN_PASSWORD: ${FD_ADMIN_PASSWORD}
+      VIRTUAL_HOST: ${PUBLIC_FQDN}
+      VIRTUAL_PORT: ${HTTP_PORT:-80}
+      LETSENCRYPT_HOST: ${PUBLIC_FQDN}
+      LETSENCRYPT_EMAIL: ${ADMIN_MAIL}
+
+#  openldap:
+#    #image: "osixia/openldap:1.1.2"
+#    image: osixia/openldap:latest
+#    domainname: andacom.de
+#    hostname: ldap
+#    volumes:
+#      - ./data/openldap/ldap:/var/lib/ldap:rw
+#      - ./data/openldap/slapd.d:/etc/ldap/slapd.d:rw
+#    #expose:
+#    #  - "389"
+#    #ports:
+#    #  - "389:389"
+#    environment:
+#      LDAP_ORGANISATION: ${LDAP_ORGANISATION}
+#      LDAP_DOMAIN: ${LDAP_DOMAIN}
+#      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+#      LDAP_READONLY_USER: ${LDAP_READONLY_USER}
+#      LDAP_BASE_DN: ${LDAP_BASE_DN}
+#      LDAP_READONLY_USER_USERNAME: ${LDAP_READONLY_USER_USERNAME}
+#      LDAP_READONLY_USER_PASSWORD: ${LDAP_READONLY_USER_PASSWORD}
+
+  openldap:
+#    image: osixia/openldap:latest
+    image: hrektts/fusiondirectory-openldap:latest
+    container_name: dc_openldap
+    environment:
+      LDAP_LOG_LEVEL: "256"
+      LDAP_ORGANISATION: ${LDAP_ORGANISATION}
+      LDAP_DOMAIN: ${LDAP_DOMAIN}
+      LDAP_BASE_DN: ${LDAP_BASE_DN}
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+      LDAP_CONFIG_PASSWORD: ${LDAP_CONFIG_PASSWORD}
+      LDAP_READONLY_USER: ${LDAP_READONLY_USER}
+      LDAP_READONLY_USER_USERNAME: ${LDAP_READONLY_USER_USERNAME}
+      LDAP_READONLY_USER_PASSWORD: ${LDAP_READONLY_USER_PASSWORD}
+      LDAP_RFC2307BIS_SCHEMA: ${LDAP_RFC2307BIS_SCHEMA}
+#      LDAP_BACKEND: ${LDAP_BACKEND}
+      LDAP_TLS: ${LDAP_TLS}
+      LDAP_TLS_CRT_FILENAME: ${LDAP_TLS_CRT_FILENAME}
+      LDAP_TLS_KEY_FILENAME: ${LDAP_TLS_KEY_FILENAME}
+      LDAP_TLS_CA_CRT_FILENAME: ${LDAP_TLS_CA_CRT_FILENAME}
+      LDAP_TLS_ENFORCE: ${LDAP_TLS_ENFORCE}
+      LDAP_TLS_CIPHER_SUITE: ${LDAP_TLS_CIPHER_SUITE}
+      LDAP_TLS_PROTOCOL_MIN: ${LDAP_TLS_PROTOCOL_MIN}
+      LDAP_TLS_VERIFY_CLIENT: ${LDAP_TLS_VERIFY_CLIENT}
+      LDAP_REPLICATION: ${LDAP_REPLICATION}
+      #LDAP_REPLICATION_CONFIG_SYNCPROV: ${LDAP_REPLICATION_CONFIG_SYNCPROV}
+      #LDAP_REPLICATION_DB_SYNCPROV: ${LDAP_REPLICATION_DB_SYNCPROV:}
+      #LDAP_REPLICATION_HOSTS: ${LDAP_REPLICATION_HOSTS}
+      KEEP_EXISTING_CONFIG: ${KEEP_EXISTING_CONFIG}
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: ${LDAP_REMOVE_CONFIG_AFTER_SETUP}
+      LDAP_SSL_HELPER_PREFIX: ${LDAP_SSL_HELPER_PREFIX}
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./data/openldap/ldap:/var/lib/ldap:rw
+      - ./data/openldap/slapd.d:/etc/ldap/slapd.d:rw
+      - ./data/openldap/certs:/container/service/slapd/assets/certs/:rw
+    ports:
+      - "389:389"
+      - "636:636"
+    domainname: ${LDAP_DOMAIN} # important: same as hostname
+    hostname: ${LDAP_DOMAIN}
+
+

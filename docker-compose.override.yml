@@ -1,0 +1,15 @@
+version: '2.1'
+services:
+
+#  phpldapadmin:
+  fusiondirectory:
+    networks:
+      - default
+      - proxy_default
+
+networks:
+  default:
+    driver: bridge
+  proxy_default: 
+    external: true
+
